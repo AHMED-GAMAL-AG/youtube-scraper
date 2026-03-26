@@ -76,24 +76,35 @@ class YouTubeService
 
         try {
             $response = Http::get("{$this->baseUrl}/playlists", [
-                'part' => 'contentDetails,statistics',
+                'part' => 'contentDetails',
                 'id' => implode(',', $playlistIds),
                 'key' => $this->apiKey,
             ]);
 
-            if (!$response->successful()) return [];
+            if (!$response->successful()) {
+                Log::warning("YouTube playlist details failed", [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return [];
+            }
 
             $details = [];
             foreach ($response->json('items', []) as $item) {
                 $id = $item['id'];
-                $videoCount = $item['contentDetails']['itemCount'] ?? 0;
-                $viewCount = $item['statistics']['viewCount'] ?? 0;
+                $videoCount = (int) ($item['contentDetails']['itemCount'] ?? 0);
 
                 $details[$id] = [
-                    'video_count' => (int) $videoCount,
-                    'view_count' => (int) $viewCount,
+                    'video_count' => $videoCount,
                     'total_duration' => $this->formatDuration($videoCount),
                 ];
+            }
+
+            $viewCounts = $this->getPlaylistViewCounts($playlistIds);
+            foreach ($viewCounts as $id => $viewCount) {
+                if (isset($details[$id])) {
+                    $details[$id]['view_count'] = $viewCount;
+                }
             }
 
             return $details;
@@ -101,6 +112,42 @@ class YouTubeService
             Log::error("YouTube playlist details error", ['error' => $e->getMessage()]);
             return [];
         }
+    }
+
+    private function getPlaylistViewCounts(array $playlistIds): array
+    {
+        $viewCounts = [];
+
+        foreach ($playlistIds as $playlistId) {
+            try {
+                $response = Http::get("{$this->baseUrl}/playlistItems", [
+                    'part' => 'contentDetails',
+                    'playlistId' => $playlistId,
+                    'maxResults' => 1,
+                    'key' => $this->apiKey,
+                ]);
+
+                if (!$response->successful()) continue;
+
+                $videoId = $response->json('items.0.contentDetails.videoId');
+                if (!$videoId) continue;
+
+                $videoResponse = Http::get("{$this->baseUrl}/videos", [
+                    'part' => 'statistics',
+                    'id' => $videoId,
+                    'key' => $this->apiKey,
+                ]);
+
+                if (!$videoResponse->successful()) continue;
+
+                $viewCount = (int) ($videoResponse->json('items.0.statistics.viewCount') ?? 0);
+                $viewCounts[$playlistId] = $viewCount;
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return $viewCounts;
     }
 
     private function formatDuration(int $videoCount): string

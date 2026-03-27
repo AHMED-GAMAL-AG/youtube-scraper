@@ -2,12 +2,21 @@
 
 A Laravel-based web application that discovers educational YouTube playlists (courses) using AI-generated search queries and displays them in a card-based Arabic RTL user interface.
 
+## Demo Video
+
+https://github.com/user-attachments/assets/demo.mp4
+
+<video src="demo.mp4" width="100%" controls autoplay muted></video>
+
+> If the video doesn't load above, download it directly: [demo.mp4](demo.mp4)
+
 ![Full Page Overview](screenshots/01-full-page.png)
 
 ---
 
 ## Table of Contents
 
+- [Demo Video](#demo-video)
 - [Features](#features)
 - [Screenshots](#screenshots)
 - [Tech Stack](#tech-stack)

@@ -4,11 +4,7 @@ A Laravel-based web application that discovers educational YouTube playlists (co
 
 ## Demo Video
 
-https://github.com/user-attachments/assets/demo.mp4
-
-<video src="demo.mp4" width="100%" controls autoplay muted></video>
-
-> If the video doesn't load above, download it directly: [demo.mp4](demo.mp4)
+https://github.com/user-attachments/assets/409b0b04-2b09-4122-8596-e3422faa4c2e
 
 ![Full Page Overview](screenshots/01-full-page.png)
 
